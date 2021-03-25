@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+variable "tags" {
+  type = map(string)
+  default = {}
+  description = "A mapping of tags to assign to all resources."
+}
+
 # TODO: Not all attributes have been implemented
 variable "storage_buckets" {
   type = list(object({

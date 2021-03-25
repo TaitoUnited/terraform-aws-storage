@@ -15,6 +15,8 @@
  */
 
 locals {
+  tags = var.tags
+
   storageBuckets = var.storage_buckets
 
   /* TODO: implement CDN

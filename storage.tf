@@ -21,9 +21,9 @@ resource "aws_s3_bucket" "bucket" {
   acl      = each.value.acl
   policy   = each.value.acl == "public-read" ? data.aws_iam_policy_document.publicassets[each.key].json : null
 
-  tags = {
+  tags = merge(local.tags, {
     purpose = each.value.purpose
-  }
+  })
 
   dynamic "cors_rule" {
     for_each = try(each.value.cors, null) != null ? each.value.cors : []
