@@ -18,7 +18,7 @@ resource "aws_s3_bucket" "bucket" {
   for_each = {for item in local.storageBuckets: item.name => item}
 
   bucket   = each.value.name
-  acl      = each.value.acl
+  acl      = coalesce(ach.value.acl, "private")
   policy   = each.value.acl == "public-read" ? data.aws_iam_policy_document.publicassets[each.key].json : null
 
   tags = merge(local.tags, {
@@ -26,32 +26,32 @@ resource "aws_s3_bucket" "bucket" {
   })
 
   dynamic "cors_rule" {
-    for_each = try(each.value.cors, null) != null ? each.value.cors : []
+    for_each = coalesce(each.value.corsRules, null) != null ? each.value.corsRules : []
     content {
-      allowed_origins  = cors.value.allowedOrigins
-      allowed_methods  = cors.value.allowedMethods
-      allowed_headers  = cors.value.allowedHeaders
-      expose_headers   = cors.value.exposeHeaders
-      max_age_seconds  = cors.value.maxAgeSeconds
+      allowed_origins  = cors_rule.value.allowedOrigins
+      allowed_methods  = coalesce(cors_rule.value.allowedMethods, ["GET","HEAD"])
+      allowed_headers  = coalesce(cors_rule.value.allowedHeaders, ["*"])
+      expose_headers   = coalesce(cors_rule.value.exposeHeaders, ["*"])
+      max_age_seconds  = coalesce(cors_rule.value.maxAgeSeconds, 5)
     }
   }
 
   versioning {
-    enabled = each.value.versioningEnabled
+    enabled = coalesce(each.value.versioningEnabled, false)
   }
 
   lifecycle_rule {
     id = "storageClass"
     enabled = (
-      try(each.value.storageClass, null) != null
-      && try(each.value.storageClass, null) != "STANDARD_IA"
+      coalesce(each.value.storageClass, null) != null
+      && coalesce(each.value.storageClass, null) != "STANDARD_IA"
     )
     transition {
       days = 0
       storage_class = (
-        try(each.value.storageClass, null) != null
-        && try(each.value.storageClass, null) != "STANDARD_IA"
-          ? try(each.value.storageClass, null)
+        coalesce(each.value.storageClass, null) != null
+        && coalesce(each.value.storageClass, null) != "STANDARD_IA"
+          ? coalesce(each.value.storageClass, null)
           : "GLACIER"
       )
     }
@@ -59,12 +59,12 @@ resource "aws_s3_bucket" "bucket" {
 
   lifecycle_rule {
     id = "transition"
-    enabled = try(each.value.transitionRetainDays, null) != null
+    enabled = coalesce(each.value.transitionRetainDays, null) != null
     transition {
-      days = try(each.value.transitionRetainDays, null)
+      days = coalesce(each.value.transitionRetainDays, null)
       storage_class = (
-        try(each.value.transitionStorageClass, null) != null
-          ? try(each.value.transitionStorageClass, null)
+        coalesce(each.value.transitionStorageClass, null) != null
+          ? coalesce(each.value.transitionStorageClass, null)
           : "GLACIER"
       )
     }
@@ -72,17 +72,17 @@ resource "aws_s3_bucket" "bucket" {
 
   lifecycle_rule {
     id = "versioning"
-    enabled = try(each.value.versioningRetainDays, null) != null
+    enabled = coalesce(each.value.versioningRetainDays, null) != null
     noncurrent_version_expiration {
-      days = try(each.value.versioningRetainDays, null)
+      days = coalesce(each.value.versioningRetainDays, null)
     }
   }
 
   lifecycle_rule {
     id = "autoDeletion"
-    enabled = try(each.value.autoDeletionRetainDays, null) != null
+    enabled = coalesce(each.value.autoDeletionRetainDays, null) != null
     expiration {
-      days = try(each.value.autoDeletionRetainDays, null)
+      days = coalesce(each.value.autoDeletionRetainDays, null)
     }
   }
 

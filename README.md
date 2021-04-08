@@ -37,7 +37,7 @@ storageBuckets:
     acl: public-read
     versioningEnabled: true
     versioningRetainDays: 60
-    cors:
+    corsRules:
       - allowedOrigins: ["*"]
 ```
 

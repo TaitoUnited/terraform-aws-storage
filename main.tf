@@ -30,7 +30,7 @@ locals {
   storageBucketMembers = flatten([
     for bucket in local.storageBuckets: [
       for member in (bucket.members != null ? bucket.members : []): [
-        for role in try(member.roles != null ? member.roles : []):
+        for role in coalesce(member.roles != null ? member.roles : []):
         {
           key    = "${bucket.name}-${member.id}-${role}"
           bucket = bucket.name
