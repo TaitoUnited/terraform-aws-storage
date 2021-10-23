@@ -18,7 +18,7 @@ resource "aws_s3_bucket" "bucket" {
   for_each = {for item in local.storageBuckets: item.name => item}
 
   bucket   = each.value.name
-  acl      = coalesce(ach.value.acl, "private")
+  acl      = coalesce(each.value.acl, "private")
   policy   = each.value.acl == "public-read" ? data.aws_iam_policy_document.publicassets[each.key].json : null
 
   tags = merge(local.tags, {
