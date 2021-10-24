@@ -27,13 +27,13 @@ variable "storage_buckets" {
     purpose = optional(string)
     acl = optional(string)
     storageClass = optional(string)
-    corsRules = list(object({
+    corsRules = optional(list(object({
       allowedOrigins = list(string)
       allowedMethods = optional(list(string))
       allowedHeaders = optional(list(string))
       exposeHeaders = optional(list(string))
       maxAgeSeconds = optional(number)
-    }))
+    })))
     versioningEnabled = optional(bool)
     versioningRetainDays = optional(number)
     # TODO: lockRetainDays = optional(number)
